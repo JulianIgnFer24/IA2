@@ -192,7 +192,7 @@ Script: `model_ols.py`.
 
 **Ajuste sobre todos los predictores** (respuesta `log(SalePrice)`):
 
-- **R² = 0.9449**, **R² ajustado = 0.9301** (train).
+- **R² = 0.9449**, **R² ajustado = 0.9291** (train).
 - Intercepto β₀ = 7.43 → precio base de la categoría de referencia ≈ $1 685 (log).
 
 **Interpretación de coeficientes β̂ (magnitud y signo):**
@@ -371,13 +371,49 @@ desperdiciando información complementaria.
 
 ## 6. Comparación final
 
-Script: `comparison.py`. Resultados sobre el set de **test**:
+Script: `comparison.py`.
 
-| Modelo | R² test | RMSE (log) | RMSE ($) | MAE ($) | Predictores efectivos | Interpretabilidad |
-|---|---|---|---|---|---|---|
-| **OLS** | 0.8383 | 0.1737 | $25 457 | $15 522 | 260 (todos) | Media — alta varianza por multicolinealidad |
-| **Ridge** | **0.8959** | **0.1394** | $25 786 | $16 750 | 260 (todos, encogidos) | Baja-media (no selecciona) |
-| **Lasso** | 0.8899 | 0.1433 | $27 290 | $17 325 | **69 de 260** | **Alta** (modelo esparso) |
+**Métricas usadas para medir los modelos** (fórmulas en la sección 3):
+
+- **R²** ($1 - RSS/TSS$): proporción de la varianza de $y$ explicada por el modelo; compara
+  contra el *baseline* de predecir la media ("la media es tu solución base", según la
+  teoría). 0 = no explica nada; 1 = ajuste perfecto.
+- **R² ajustado**: R² penalizado por el número de predictores $p$; solo aumenta si una
+  variable nueva aporta más que el azar, por lo que evita "ganar" agregando predictores
+  irrelevantes. Se reporta sobre train (es una medida del ajuste penalizado).
+- **RMSE** ($\sqrt{\tfrac1n\sum \hat\varepsilon_i^2}$): error cuadrático medio en las mismas
+  unidades de $y$; penaliza **cuadráticamente** los errores grandes → sensible a outliers.
+  Se reporta en escala log y, vía $\exp(\cdot)$, en dólares.
+- **MAE** ($\tfrac1n\sum|\hat\varepsilon_i|$): error absoluto medio; interpretación directa
+  ("error promedio") y **robusto** a outliers.
+
+Reportar todas en **train y test** permite ver generalización: un modelo con buen R² de
+train pero malo de test está sobreajustado (alta varianza).
+
+**Resultados completos (train / test):**
+
+| Modelo | Set | R² | R² adj | RMSE (log) | MAE (log) | RMSE | MAE |
+|---|---|---|---|---|---|---|---|
+| **OLS** | train | 0.9449 | 0.9291 | 0.0916 | 0.0628 | $17 372 | $10 986 |
+| | test | 0.8383 | — | 0.1737 | 0.0958 | $25 457 | $15 522 |
+| **Ridge** | train | 0.9114 | 0.8860 | 0.1162 | 0.0785 | $26 241 | $14 334 |
+| | test | **0.8959** | — | **0.1394** | **0.0964** | $25 786 | $16 750 |
+| **Lasso** | train | 0.8947 | 0.8880 | 0.1267 | 0.0847 | $30 712 | $15 577 |
+| | test | 0.8899 | — | 0.1433 | 0.0997 | $27 290 | $17 325 |
+
+Lectura de las métricas: OLS domina en train (mayor R², menores RMSE/MAE) pero es el peor
+en test en todas las métricas → sobreajuste. Ridge gana en test en R² y RMSE/MAE log; en
+dólares, OLS tiene un RMSE ($) ligeramente menor, pero ese número está dominado por pocas
+casas caras (outliers) y no refleja el comportamiento general: en log y R², que ponderan
+el error relativo, Ridge es claramente superior y más estable.
+
+**Resumen de modelos:**
+
+| Modelo | Predictores efectivos | Interpretabilidad |
+|---|---|---|
+| OLS | 260 (todos) | Media — alta varianza por multicolinealidad |
+| Ridge | 260 (todos, encogidos) | Baja-media (no selecciona) |
+| Lasso | **69 de 260** | **Alta** (modelo esparso) |
 
 **Estudio predictivo (generalización, trade-off sesgo-varianza):**
 
