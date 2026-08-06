@@ -150,7 +150,7 @@ de «superficie» y «calidad/años» se refuerzan esta conclusión.
 
 ## 2. Preparación de datos
 
-Se implementa en el script reproducible `ejercicio1/preprocess.py`:
+Se implementa en el script reproducible `preprocess.py`:
 
 1. **Imputación de faltantes:** numéricas → mediana; categóricas → nivel `"NaN"`
    (los NA en columnas como `PoolQC`, `GarageType`, `Alley` significan *"no tiene esa
@@ -178,7 +178,7 @@ interprete como el **efecto diferencial respecto a la categoría de referencia**
 
 ## 3. Regresión lineal multivariable (OLS)
 
-Script: `ejercicio1/model_ols.py`.
+Script: `model_ols.py`.
 
 **Ajuste sobre todos los predictores** (respuesta `log(SalePrice)`):
 
@@ -227,7 +227,7 @@ Script: `ejercicio1/model_ols.py`.
 
 **Análisis de residuos:**
 
-![Residuos OLS](ejercicio1/figs/ols_residuos.png)
+![Residuos OLS](figs/ols_residuos.png)
 
 - Residuos vs. ajustados: patrón de embudo (la dispersión cambia con el nivel) →
   **heterocedasticidad** (Breusch-Pagan p≈0).
@@ -243,13 +243,13 @@ Script: `ejercicio1/model_ols.py`.
 
 ## 4. Regresión Ridge
 
-Script: `ejercicio1/model_ridge.py`.
+Script: `model_ridge.py`.
 
 - **Búsqueda de λ por CV de 5 folds:** λ\* = **20.09**.
 - **Camino de regularización** (coefs vs. λ): a λ creciente todos los coeficientes
   **encogen hacia 0 sin anularse** (regularización L2).
 
-![Camino Ridge](ejercicio1/figs/ridge_camino.png)
+![Camino Ridge](figs/ridge_camino.png)
 - **Comparación con OLS:** Ridge encoge fuertemente los β̂ inestables del OLS. Los más
   encogidos son precisamente los que tenían β̂ irreales en OLS (`PoolQC_NaN`: 2.23→~0.01;
   `RoofMatl_*`: 1.7→~0). 
@@ -270,7 +270,7 @@ miembros de cada grupo colineal en lugar de asignarlo arbitrariamente a uno:
 
 ## 5. Regresión Lasso
 
-Script: `ejercicio1/model_lasso.py`.
+Script: `model_lasso.py`.
 
 - **λ\* por CV de 5 folds = 0.00137.**
 - **Coeficientes llevados exactamente a cero: 191 de 260.** "Sobreviven" **69 variables**
@@ -290,7 +290,7 @@ Script: `ejercicio1/model_lasso.py`.
 
 ## 6. Comparación final
 
-Script: `ejercicio1/comparison.py`. Resultados sobre el set de **test**:
+Script: `comparison.py`. Resultados sobre el set de **test**:
 
 | Modelo | R² test | RMSE (log) | RMSE ($) | MAE ($) | Predictores efectivos | Interpretabilidad |
 |---|---|---|---|---|---|---|
