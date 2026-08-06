@@ -148,4 +148,169 @@ de «superficie» y «calidad/años» se refuerzan esta conclusión.
 
 ---
 
-*(Secciones 2 a 6 del ejercicio se completarán en pasos siguientes.)*
+## 2. Preparación de datos
+
+Se implementa en el script reproducible `ejercicio1/preprocess.py`:
+
+1. **Imputación de faltantes:** numéricas → mediana; categóricas → nivel `"NaN"`
+   (los NA en columnas como `PoolQC`, `GarageType`, `Alley` significan *"no tiene esa
+   característica"* y se conservan como un nivel propio).
+2. **Codificación dummy con categoría de referencia (k−1):** cada categórica con más de
+   2 niveles se codifica con `pd.get_dummies(..., drop_first=True)`, generando **k−1**
+   columnas. Por ejemplo, `Neighborhood` (25 niveles) → 24 dummies; la categoría
+   **referencia es la primera por orden alfabético** (para `Neighborhood`, `Blmngtn`),
+   que queda representada por el intercepto.
+3. **Estandarización:** `StandardScaler` ajustado **solo en train** y aplicado a train y
+   test (evita *data leakage*). Se estandarizan únicamente las numéricas continuas; las
+   dummies (0/1) no se estandarizan.
+4. **División 80/20** con `random_state=42`: **1168 train / 292 test**.
+
+**Resultado:** 36 numéricas estandarizadas + 224 dummies = **260 predictores**.
+
+**¿Por qué no incluir las k dummies completas (trampa de la variable dummy)?**
+Con el intercepto y las k columnas dummies de una misma categoría, la suma de las k
+dummies es exactamente el vector de unos → **colinealidad perfecta**: `D₁+D₂+…+Dₖ = 1ₙ`,
+y `(XᵀX)` se vuelve singular (no invertible), por lo que OLS no tiene solución única.
+Usar **k−1** columnas elimina esa redundancia y hace que cada coeficiente dummy se
+interprete como el **efecto diferencial respecto a la categoría de referencia**.
+
+---
+
+## 3. Regresión lineal multivariable (OLS)
+
+Script: `ejercicio1/model_ols.py`.
+
+**Ajuste sobre todos los predictores** (respuesta `log(SalePrice)`):
+
+- **R² = 0.9449**, **R² ajustado = 0.9301** (train).
+- Intercepto β₀ = 7.43 → precio base de la categoría de referencia ≈ $1 685 (log).
+
+**Interpretación de coeficientes β̂ (magnitud y signo):**
+
+| Predictor | β̂ | Interpretación (con el resto fijo) |
+|---|---|---|
+| `GrLivArea` | +0.065 | +1 ds de superficie habitable → +6.5 % precio |
+| `YearBuilt` | +0.060 | +1 ds de antigüedad (más nuevo) → +6.0 % |
+| `OverallQual` | +0.056 | +1 ds de calidad general → +5.6 % |
+| `OverallCond` | +0.039 | +1 ds de condición → +3.9 % |
+| `TotalBsmtSF` | +0.038 | +1 ds de sótano → +3.8 % |
+| `2ndFlrSF`, `1stFlrSF`, `GarageArea` | + | más superficie → mayor precio |
+
+- **Dummies** (interpretación respecto a la referencia): el coeficiente dummy `D_j` indica
+  el **cambio logarítmico respecto a la categoría de referencia**; `exp(β̂)` es el factor
+  multiplicativo del precio. Ej.: `RoofMatl_CompShg` β̂≈+1.74 → las casas con techo de
+  compuesto valen ≈ **e^1.74 ≈ 5.7×** más que la referencia `ClyTile`.
+- **Señales de inestabilidad:** dummies casi constantes (p. ej. `PoolQC_NaN` con β̂≈+2.2,
+  por la casi ausencia de piscinas) muestran β̂ irreales → síntoma de la alta varianza
+  que provoca la multicolinealidad.
+
+**VIF (multicolinealidad):** de los 260 predictores:
+- **19 con VIF = ∞** (relación lineal perfecta): `TotalBsmtSF` es suma exacta de sus
+  componentes; `GrLivArea` es suma de las superficies de piso; las dummies `*_NaN` de
+  garaje y de sótano son **idénticas** (marcan las mismas casas sin garaje/sótano).
+- **78 con VIF ≥ 10** (colinealidad fuerte), incl. `PoolArea` (3651) y `RoofMatl_*`.
+- **Conclusión:** hay **fuerte evidencia de multicolinealidad**.
+- **Candidatas a eliminar:** las componentes de área redundantes (`BsmtFinSF1/SF2/UnfSF`
+  frente a `TotalBsmtSF`; `1stFlrSF`/`2ndFlrSF`/`LowQualFinSF` frente a `GrLivArea`) y las
+  dummies `*_NaN` duplicadas.
+- **Candidatas a combinar:** un único indicador *"tiene garaje"* en vez de 4 dummies `NaN`.
+
+**Evaluación en test:**
+
+| Métrica | Valor |
+|---|---|
+| R² | 0.8383 |
+| RMSE (log) | 0.1737 |
+| MAE (log) | 0.0958 |
+| RMSE | **$25 457** |
+| MAE | $15 522 |
+
+**Análisis de residuos:**
+
+![Residuos OLS](ejercicio1/figs/ols_residuos.png)
+
+- Residuos vs. ajustados: patrón de embudo (la dispersión cambia con el nivel) →
+  **heterocedasticidad** (Breusch-Pagan p≈0).
+- Q-Q: puntos se apartan de la diagonal en las colas → **no-normalidad** (Shapiro-Wilk
+  p≈8e-27; asimetría −0.95, kurtosis 11). Hay **45 residuos >2σ** (12 >3σ), típico de
+  precios extremos.
+- **Supuestos de Gauss-Markov:** se violan **independencia/normalidad** y
+  **homocedasticidad** (mejoradas por el log, pero no eliminadas) y **no-multicolinealidad**.
+  Los β̂ siguen siendo **insesgados**, pero los errores estándar y p-valores no son fiables;
+  la varianza está inflada. Esto justifica recurrir a la regularización.
+
+---
+
+## 4. Regresión Ridge
+
+Script: `ejercicio1/model_ridge.py`.
+
+- **Búsqueda de λ por CV de 5 folds:** λ\* = **20.09**.
+- **Camino de regularización** (coefs vs. λ): a λ creciente todos los coeficientes
+  **encogen hacia 0 sin anularse** (regularización L2).
+
+![Camino Ridge](ejercicio1/figs/ridge_camino.png)
+- **Comparación con OLS:** Ridge encoge fuertemente los β̂ inestables del OLS. Los más
+  encogidos son precisamente los que tenían β̂ irreales en OLS (`PoolQC_NaN`: 2.23→~0.01;
+  `RoofMatl_*`: 1.7→~0). 
+
+**¿Qué ocurre con los predictores correlacionados?** Ridge reparte el peso entre los
+miembros de cada grupo colineal en lugar de asignarlo arbitrariamente a uno:
+
+| Par | OLS | Ridge |
+|---|---|---|
+| `GarageArea` | +0.033 | +0.008 |
+| `GarageCars` | +0.006 | +0.042 |
+| `GrLivArea` | +0.065 | +0.056 |
+| `TotRmsAbvGrd` | +0.005 | +0.022 |
+
+**Evaluación en test:** R² = **0.8959**, RMSE(log) = 0.1394, RMSE = $25 786, MAE = $16 750.
+
+---
+
+## 5. Regresión Lasso
+
+Script: `ejercicio1/model_lasso.py`.
+
+- **λ\* por CV de 5 folds = 0.00137.**
+- **Coeficientes llevados exactamente a cero: 191 de 260.** "Sobreviven" **69 variables**
+  (selección de variables L1).
+- **Variables sobrevivientes más influyentes:** `GrLivArea` (+0.101), `OverallQual`
+  (+0.096), dummies de barrio de alta gama (`Neighborhood_NridgHt` +0.074, `Crawfor`
+  +0.072, `StoneBr` +0.062), `MSZoning_RM` (−0.056), `GarageCars` (+0.053),
+  `YearBuilt` (+0.046), `OverallCond` (+0.043), `CentralAir_Y` (+0.043).
+- **Interpretación:** Lasso eliminó las dummies ruidosas/casi constantes (piscina,
+  materiales de techo, etc.) y las columnas redundantes; retuvo los predictores que
+  realmente importan (calidad, superficie, barrio, garaje, aire acondicionado). Es una
+  **selección de variables automática** basada en los datos.
+
+**Evaluación en test:** R² = 0.8899, RMSE(log) = 0.1433, RMSE = $27 290, MAE = $17 325.
+
+---
+
+## 6. Comparación final
+
+Script: `ejercicio1/comparison.py`. Resultados sobre el set de **test**:
+
+| Modelo | R² test | RMSE (log) | RMSE ($) | MAE ($) | Predictores efectivos | Interpretabilidad |
+|---|---|---|---|---|---|---|
+| **OLS** | 0.8383 | 0.1737 | $25 457 | $15 522 | 260 (todos) | Media — alta varianza por multicolinealidad |
+| **Ridge** | **0.8959** | **0.1394** | $25 786 | $16 750 | 260 (todos, encogidos) | Baja-media (no selecciona) |
+| **Lasso** | 0.8899 | 0.1433 | $27 290 | $17 325 | **69 de 260** | **Alta** (modelo esparso) |
+
+**Recomendación (trade-off sesgo-varianza):**
+Con 19 predictores con VIF=∞ y 78 con VIF≥10, OLS tiene **varianza máxima** (β̂
+inestables, mal R² de test a pesar del buen R² de train → claro sobreajuste, alta
+varianza). La regularización introduce un poco de **sesgo** (encogen β̂) a cambio de
+**reducir drásticamente la varianza**:
+
+- **Ridge** logra el mejor equilibrio predictivo (mayor R² de test y menor RMSE en log):
+  como todas las variables son informativas aunque estén correlacionadas, encogerlas
+  (sin eliminarlas) aprovecha toda la información. 
+- **Lasso** logra casi el mismo R² con solo 69 variables: ideal cuando se necesita un
+  **modelo explicable y desplegable** (menos costo de recolección y mayor claridad).
+
+**Conclusión del caso de negocio:** si el objetivo es **precisión de predicción de
+precios**, recomiendo **Ridge**; si se prioriza **interpretabilidad/despliegue con pocas
+variables**, recomiendo **Lasso**. OLS queda descartado por la inestabilidad que genera la
+multicolinealidad.
