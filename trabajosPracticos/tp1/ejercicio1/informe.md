@@ -155,17 +155,26 @@ de «superficie» y «calidad/años» se refuerzan esta conclusión.
 
 ## 2. Preparación de datos
 
-Se implementa en el script reproducible `preprocess.py`:
+Se implementa en el script reproducible `preprocess.py`. El análisis exploratorio del
+punto 1 se hizo sobre los datos **crudos**; los pasos siguientes son los que dejan el
+dataset listo para trabajar con los modelos:
 
-1. **Imputación de faltantes:** numéricas → mediana; categóricas → nivel `"NaN"`
+1. **Lectura y limpieza inicial:** se carga `train.csv` (1460×81) y se descarta `Id`
+   (identificador de fila, sin valor predictivo). Se separa la respuesta y se le aplica la
+   transformación $y = \log(SalePrice)$ justificada en 1.3, quedando la matriz $X$ con los
+   79 predictores. Se identifican los tipos: **36 numéricas continuas** (superficies,
+   años, contadores, puntajes) y **43 categóricas** (algunas ordinales, p. ej.
+   `ExterQual`, `BsmtQual`; se tratan como nominales y se dummifican).
+2. **Imputación de faltantes:** numéricas → mediana; categóricas → nivel `"NaN"`
    (los NA en columnas como `PoolQC`, `GarageType`, `Alley` significan *"no tiene esa
-   característica"* y se conservan como un nivel propio).
-2. **Codificación dummy con categoría de referencia (k−1):** cada categórica con más de
+   característica"* y se conservan como un nivel propio con información, en lugar de
+   eliminar filas: borrar las filas con NA dejaría el dataset sin la mayoría de las casas).
+3. **Codificación dummy con categoría de referencia (k−1):** cada categórica con más de
    2 niveles se codifica con `pd.get_dummies(..., drop_first=True)`, generando **k−1**
    columnas. Por ejemplo, `Neighborhood` (25 niveles) → 24 dummies; la categoría
    **referencia es la primera por orden alfabético** (para `Neighborhood`, `Blmngtn`),
    que queda representada por el intercepto.
-3. **Estandarización (normalización), fórmula (6.6) de la teoría:** cada predictor
+4. **Estandarización (normalización), fórmula (6.6) de la teoría:** cada predictor
    numérico continuo se transforma como
 
    $$\tilde{x}_{ij} = \frac{x_{ij} - \hat{\mu}_j}{\hat{\sigma}_j}$$
@@ -178,7 +187,7 @@ Se implementa en el script reproducible `preprocess.py`:
    estandarizar, una variable medida en miles (p. ej. `LotArea`) recibiría un castigo
    injusto respecto de una medida en unidades (`FullBath`). Se estandarizan únicamente las
    numéricas continuas; las dummies (0/1) no.
-4. **División 80/20** con `random_state=42`: **1168 train / 292 test**.
+5. **División 80/20** con `random_state=42`: **1168 train / 292 test**.
 
 **Resultado:** 36 numéricas estandarizadas + 224 dummies = **260 predictores**.
 
