@@ -1,7 +1,7 @@
 # Informe TP1 — Regresión Lineal Multivariable (Ejercicio 1)
 
 **Dataset:** *House Prices — Advanced Regression Techniques* (Kaggle).
-**Archivo:** `train.csv` con 1460 observaciones y 81 columnas (1460 filas × 81 atributos + *Id*).
+**Archivo:** `train.csv` con **1460 filas y 81 columnas** (detalle en la sección 1).
 
 Este informe se redacta por partes según la consigna. Cada sección se completa a medida que
 se resuelve cada ítem.
@@ -28,6 +28,11 @@ se resuelve cada ítem.
 ---
 
 ## 1. Análisis exploratorio
+
+**Dimensiones del dataset:** `train.csv` tiene **1460 filas y 81 columnas**: 1 variable
+respuesta (`SalePrice`), 79 predictores (36 numéricos + 43 categóricos) y la columna `Id`.
+El `test.csv` de Kaggle (solo para envío de predicciones) tiene **1459 filas y 80 columnas**
+(sin `SalePrice`).
 
 ### 1.1 Análisis descriptivo — Variables numéricas
 
