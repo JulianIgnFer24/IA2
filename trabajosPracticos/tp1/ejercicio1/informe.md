@@ -160,9 +160,19 @@ Se implementa en el script reproducible `preprocess.py`:
    columnas. Por ejemplo, `Neighborhood` (25 niveles) → 24 dummies; la categoría
    **referencia es la primera por orden alfabético** (para `Neighborhood`, `Blmngtn`),
    que queda representada por el intercepto.
-3. **Estandarización:** `StandardScaler` ajustado **solo en train** y aplicado a train y
-   test (evita *data leakage*). Se estandarizan únicamente las numéricas continuas; las
-   dummies (0/1) no se estandarizan.
+3. **Estandarización (normalización), fórmula (6.6) de la teoría:** cada predictor
+   numérico continuo se transforma como
+
+   $$\tilde{x}_{ij} = \frac{x_{ij} - \hat{\mu}_j}{\hat{\sigma}_j}$$
+
+   donde $\hat{\mu}_j$ y $\hat{\sigma}_j$ (desviación estándar estimada del predictor $j$) se
+   calculan **solo con el set de train** y luego se aplican a train y test (evita *data
+   leakage*), de modo que todos los predictores quedan en la misma escala (media 0,
+   desvío 1). Esto es **obligatorio antes de Ridge/Lasso**, porque la penalización
+   $\lambda\|\beta\|^2$ (o $\lambda\|\beta\|_1$) castiga el tamaño de los coeficientes: sin
+   estandarizar, una variable medida en miles (p. ej. `LotArea`) recibiría un castigo
+   injusto respecto de una medida en unidades (`FullBath`). Se estandarizan únicamente las
+   numéricas continuas; las dummies (0/1) no.
 4. **División 80/20** con `random_state=42`: **1168 train / 292 test**.
 
 **Resultado:** 36 numéricas estandarizadas + 224 dummies = **260 predictores**.
@@ -239,13 +249,52 @@ Script: `model_ols.py`.
   Los β̂ siguen siendo **insesgados**, pero los errores estándar y p-valores no son fiables;
   la varianza está inflada. Esto justifica recurrir a la regularización.
 
+**Modelo de errores (teoría) y su distribución empírica:**
+
+La teoría supone el modelo lineal con errores aditivos:
+
+$$y_i = \beta_0 + \sum_{j=1}^{p} \beta_j x_{ij} + \varepsilon_i, \qquad E[\varepsilon_i] = 0, \quad Var(\varepsilon_i) = \sigma^2 \ \forall i, \quad Cov(\varepsilon_i, \varepsilon_k) = 0$$
+
+es decir, errores de media cero, **homocedásticos** (varianza $\sigma^2$ constante) e
+**independientes**; y para la inferencia, $\varepsilon_i \sim \mathcal{N}(0, \sigma^2)$.
+Los residuos $\hat{\varepsilon}_i = y_i - \hat{y}_i$ son la realización muestral de esos
+errores, y con ellos se construyen las métricas de evaluación:
+
+$$RSS = \sum_{i=1}^{n} \hat{\varepsilon}_i^2, \quad RMSE = \sqrt{\tfrac{1}{n}\sum_i \hat{\varepsilon}_i^2}, \quad MAE = \tfrac{1}{n}\sum_i |\hat{\varepsilon}_i|, \quad R^2 = 1 - \frac{RSS}{TSS}, \quad R^2_{adj} = 1 - \frac{RSS/(n-p-1)}{TSS/(n-1)}$$
+
+**¿Cómo se distribuyen los errores en nuestro modelo?** Los residuos de train muestran:
+
+- **Asimetría −0.95 y kurtosis 11.0** (colas pesadas), con 45 residuos $>2\hat\sigma$ y
+  12 $>3\hat\sigma$: la distribución empírica **no es normal** (Shapiro-Wilk: W = 0.901,
+  p ≈ 8e-27), visible en el Q-Q como desviaciones en ambas colas.
+- **Heterocedasticidad:** el test de Breusch-Pagan rechaza varianza constante (p ≈ 0) y el
+  gráfico residuos-vs-ajustados muestra dispersión no uniforme (embudo).
+
+En consecuencia, los supuestos de normalidad y homocedasticidad de los errores **no se
+cumplen exactamente** (el log los aproxima pero no los garantiza). Esto no invalida la
+predicción puntual (β̂ sigue siendo insesgado), pero sí la inferencia clásica (p-valores,
+intervalos de confianza) y explica parte de la varianza excesiva del OLS — otro motivo para
+preferir los modelos regularizados de las secciones 4 y 5.
+
 ---
 
 ## 4. Regresión Ridge
 
 Script: `model_ridge.py`.
 
-- **Búsqueda de λ por CV de 5 folds:** λ\* = **20.09**.
+**Método (según la teoría):** Ridge ajusta los mismos predictores pero minimizando el RSS
+más una **penalización de contracción L2** (que no se aplica al intercepto $\beta_0$):
+
+$$\hat{\beta}_{ridge} = \arg\min_{\beta}\left\{ \sum_{i=1}^{n}\Big(y_i - \beta_0 - \textstyle\sum_j \beta_j x_{ij}\Big)^2 + \lambda \sum_{j=1}^{p} \beta_j^2 \right\} = \arg\min_{\beta}\{ RSS + \lambda \|\beta\|_2^2 \}$$
+
+con forma cerrada $\hat{\beta}_{ridge} = (X^\top X + \lambda I)^{-1} X^\top y$. Con
+$\lambda = 0$ se recupera OLS; cuando $\lambda \to \infty$ los coeficientes $\to 0$. El
+valor de $\lambda$ es crítico y se elige por **validación cruzada de 5 folds**.
+
+**Aplicación y resultados:**
+
+- **Búsqueda de λ por CV de 5 folds:** λ\* = **20.09** (un λ grande, consistente con un
+  problema muy colineal).
 - **Camino de regularización** (coefs vs. λ): a λ creciente todos los coeficientes
   **encogen hacia 0 sin anularse** (regularización L2).
 
@@ -264,6 +313,18 @@ miembros de cada grupo colineal en lugar de asignarlo arbitrariamente a uno:
 | `GrLivArea` | +0.065 | +0.056 |
 | `TotRmsAbvGrd` | +0.005 | +0.022 |
 
+**Consecuencias de usar Ridge con la forma de estos datos:**
+En este dataset, $X^\top X$ es **numéricamente singular**: el número de condición de la
+matriz de diseño es ≈ **6.8×10¹⁸** ($\sigma_{min} \approx 2.5\times10^{-17}$), por las 19
+relaciones lineales perfectas detectadas por el VIF. Por eso la solución OLS
+$(X^\top X)^{-1}X^\top y$ es inestable (varianza enorme). Ridge suma $\lambda I$ a la
+diagonal, **haciendo invertible y estable** el sistema: a cambio de un sesgo pequeño,
+reduce fuertemente la varianza del estimador (trade-off sesgo-varianza). El efecto se ve
+en los resultados: el R² de test sube de 0.838 (OLS) a **0.896** y el RMSE en log baja de
+0.174 a **0.139**. Como contrapartida, Ridge **no selecciona variables**: conserva las 260
+(menor interpretabilidad), y en grupos correlacionados reparte el peso en lugar de
+asignarlo a una sola.
+
 **Evaluación en test:** R² = **0.8959**, RMSE(log) = 0.1394, RMSE = $25 786, MAE = $16 750.
 
 ---
@@ -271,6 +332,16 @@ miembros de cada grupo colineal en lugar de asignarlo arbitrariamente a uno:
 ## 5. Regresión Lasso
 
 Script: `model_lasso.py`.
+
+**Método (según la teoría):** igual que Ridge pero con penalización **L1**:
+
+$$\hat{\beta}_{lasso} = \arg\min_{\beta}\left\{ \sum_{i=1}^{n}\Big(y_i - \beta_0 - \textstyle\sum_j \beta_j x_{ij}\Big)^2 + \lambda \sum_{j=1}^{p} |\beta_j| \right\} = \arg\min_{\beta}\{ RSS + \lambda \|\beta\|_1 \}$$
+
+Como la región $\|\beta\|_1 \le t$ tiene **esquinas** sobre los ejes, la solución Lasso lleva
+coeficientes **exactamente a cero** → realiza **selección de variables** automática (a
+diferencia de Ridge, que siempre conserva las $p$ variables).
+
+**Aplicación y resultados:**
 
 - **λ\* por CV de 5 folds = 0.00137.**
 - **Coeficientes llevados exactamente a cero: 191 de 260.** "Sobreviven" **69 variables**
@@ -283,6 +354,16 @@ Script: `model_lasso.py`.
   materiales de techo, etc.) y las columnas redundantes; retuvo los predictores que
   realmente importan (calidad, superficie, barrio, garaje, aire acondicionado). Es una
   **selección de variables automática** basada en los datos.
+
+**Consecuencias de usar Lasso con la forma de estos datos:**
+Con 260 predictores altamente redundantes (grupos colineales de superficies, dummies
+`*_NaN` idénticas), la penalización L1 descarta de una vez todo el "ruido" y los
+miembros redundantes de cada grupo, quedando un modelo **esparso y explicable** con 69
+variables. El λ\* pequeño (0.00137) indica que, una vez eliminadas las variables
+redundantes, las restantes casi no necesitan contracción. El costo: al forzar ceros, Lasso
+pierde un poco de precisión frente a Ridge (R² test 0.890 vs 0.896) y, dentro de un grupo
+de variables correlacionadas, tiende a **elegir solo una** de forma algo arbitraria,
+desperdiciando información complementaria.
 
 **Evaluación en test:** R² = 0.8899, RMSE(log) = 0.1433, RMSE = $27 290, MAE = $17 325.
 
@@ -297,6 +378,29 @@ Script: `comparison.py`. Resultados sobre el set de **test**:
 | **OLS** | 0.8383 | 0.1737 | $25 457 | $15 522 | 260 (todos) | Media — alta varianza por multicolinealidad |
 | **Ridge** | **0.8959** | **0.1394** | $25 786 | $16 750 | 260 (todos, encogidos) | Baja-media (no selecciona) |
 | **Lasso** | 0.8899 | 0.1433 | $27 290 | $17 325 | **69 de 260** | **Alta** (modelo esparso) |
+
+**Estudio predictivo (generalización, trade-off sesgo-varianza):**
+
+Según la teoría, el error esperado de predicción en un punto nuevo se descompone como:
+
+$$E[(y_0 - \hat{f}(x_0))^2] = Var(\hat{f}(x_0)) + [Bias(\hat{f}(x_0))]^2 + Var(\varepsilon)$$
+
+El tercer término es irreducible; el objetivo es elegir la flexibilidad que minimiza la
+suma de sesgo² y varianza (el error de test sigue una forma de U mientras el de train
+siempre decrece). La tabla train vs. test lo muestra con nuestros datos:
+
+| Modelo | R² train | R² test | RMSE log train | RMSE log test | Brecha train−test (R²) |
+|---|---|---|---|---|---|
+| OLS | 0.9449 | 0.8383 | 0.0916 | 0.1737 | **0.107** (sobreajuste, alta varianza) |
+| Ridge | 0.9114 | 0.8959 | 0.1170 | 0.1394 | 0.015 |
+| Lasso | 0.8947 | 0.8899 | 0.1267 | 0.1433 | 0.005 |
+
+OLS tiene el **menor error de train pero el peor de test**: su varianza domina el error
+(β̂ inestables por la multicolinealidad y los 260 predictores). Ridge y Lasso aceptan más
+sesgo (R² train menor) a cambio de una **caída enorme de la varianza**, y por eso
+generalizan mucho mejor (brechas 0.015 y 0.005). Entre ellos, Ridge está en el mínimo de
+la curva de error de test (mejor predicción), y Lasso muy cerca con un modelo 4× más
+simple.
 
 **Recomendación (trade-off sesgo-varianza):**
 Con 19 predictores con VIF=∞ y 78 con VIF≥10, OLS tiene **varianza máxima** (β̂
