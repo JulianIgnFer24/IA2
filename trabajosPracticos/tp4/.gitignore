@@ -1,0 +1,4 @@
+# Pesos entrenados: los del WRN-28-10 pesan 418 MB cada uno, muy por encima
+# del límite de 100 MB por archivo de GitHub. Se regeneran con:
+#   cd code && ../.venv/bin/python train.py
+results/*.keras
