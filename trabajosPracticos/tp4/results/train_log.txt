@@ -1,0 +1,261 @@
+Dispositivo: NVIDIA GeForce RTX 5060 Ti (CC 12.0)
+Train: (54000, 28, 28, 1) | Val: (6000, 28, 28, 1) | Test: (10000, 28, 28, 1)
+
+======================================================================
+Exp 1 — LeNet-5 Clásica  (44,426 parámetros entrenables)
+======================================================================
+Model: "LeNet5_clasica"
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━┓
+┃ Layer (type)                    ┃ Output Shape           ┃       Param # ┃
+┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━┩
+│ conv1 (Conv2D)                  │ (None, 24, 24, 6)      │           156 │
+├─────────────────────────────────┼────────────────────────┼───────────────┤
+│ pool1 (AveragePooling2D)        │ (None, 12, 12, 6)      │             0 │
+├─────────────────────────────────┼────────────────────────┼───────────────┤
+│ conv2 (Conv2D)                  │ (None, 8, 8, 16)       │         2,416 │
+├─────────────────────────────────┼────────────────────────┼───────────────┤
+│ pool2 (AveragePooling2D)        │ (None, 4, 4, 16)       │             0 │
+├─────────────────────────────────┼────────────────────────┼───────────────┤
+│ flatten (Flatten)               │ (None, 256)            │             0 │
+├─────────────────────────────────┼────────────────────────┼───────────────┤
+│ fc1 (Dense)                     │ (None, 120)            │        30,840 │
+├─────────────────────────────────┼────────────────────────┼───────────────┤
+│ fc2 (Dense)                     │ (None, 84)             │        10,164 │
+├─────────────────────────────────┼────────────────────────┼───────────────┤
+│ output (Dense)                  │ (None, 10)             │           850 │
+└─────────────────────────────────┴────────────────────────┴───────────────┘
+ Total params: 44,426 (173.54 KB)
+ Trainable params: 44,426 (173.54 KB)
+ Non-trainable params: 0 (0.00 B)
+Epoch 1/20
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+E0000 00:00:1788295855.330755 1429340 node_def_util.cc:682] NodeDef mentions attribute use_unbounded_threadpool which is not in the op definition: Op<name=MapDataset; signature=input_dataset:variant, other_arguments: -> handle:variant; attr=f:func; attr=Targuments:list(type),min=0; attr=output_types:list(type),min=1; attr=output_shapes:list(shape),min=1; attr=use_inter_op_parallelism:bool,default=true; attr=preserve_cardinality:bool,default=false; attr=force_synchronous:bool,default=false; attr=metadata:string,default=""> This may be expected if your graph generating binary is newer  than this binary. Unknown attributes will be ignored. NodeDef: {{node ParallelMapDatasetV2/_15}}
+E0000 00:00:1788295864.137629 1429340 node_def_util.cc:682] NodeDef mentions attribute use_unbounded_threadpool which is not in the op definition: Op<name=MapDataset; signature=input_dataset:variant, other_arguments: -> handle:variant; attr=f:func; attr=Targuments:list(type),min=0; attr=output_types:list(type),min=1; attr=output_shapes:list(shape),min=1; attr=use_inter_op_parallelism:bool,default=true; attr=preserve_cardinality:bool,default=false; attr=force_synchronous:bool,default=false; attr=metadata:string,default=""> This may be expected if your graph generating binary is newer  than this binary. Unknown attributes will be ignored. NodeDef: {{node ParallelMapDatasetV2/_15}}
+844/844 - 9s - 11ms/step - accuracy: 0.7514 - loss: 0.6697 - val_accuracy: 0.8133 - val_loss: 0.5008
+Epoch 2/20
+844/844 - 2s - 3ms/step - accuracy: 0.8361 - loss: 0.4449 - val_accuracy: 0.8415 - val_loss: 0.4226
+Epoch 3/20
+844/844 - 2s - 3ms/step - accuracy: 0.8596 - loss: 0.3828 - val_accuracy: 0.8548 - val_loss: 0.3937
+Epoch 4/20
+844/844 - 2s - 3ms/step - accuracy: 0.8719 - loss: 0.3487 - val_accuracy: 0.8522 - val_loss: 0.3938
+Epoch 5/20
+844/844 - 2s - 3ms/step - accuracy: 0.8810 - loss: 0.3252 - val_accuracy: 0.8567 - val_loss: 0.3860
+Epoch 6/20
+844/844 - 2s - 3ms/step - accuracy: 0.8867 - loss: 0.3069 - val_accuracy: 0.8628 - val_loss: 0.3618
+Epoch 7/20
+844/844 - 2s - 3ms/step - accuracy: 0.8929 - loss: 0.2918 - val_accuracy: 0.8682 - val_loss: 0.3443
+Epoch 8/20
+844/844 - 2s - 3ms/step - accuracy: 0.8981 - loss: 0.2778 - val_accuracy: 0.8678 - val_loss: 0.3384
+Epoch 9/20
+844/844 - 2s - 3ms/step - accuracy: 0.9028 - loss: 0.2662 - val_accuracy: 0.8712 - val_loss: 0.3325
+Epoch 10/20
+844/844 - 2s - 3ms/step - accuracy: 0.9061 - loss: 0.2555 - val_accuracy: 0.8710 - val_loss: 0.3382
+Epoch 11/20
+844/844 - 2s - 3ms/step - accuracy: 0.9103 - loss: 0.2453 - val_accuracy: 0.8773 - val_loss: 0.3296
+Epoch 12/20
+844/844 - 2s - 3ms/step - accuracy: 0.9132 - loss: 0.2357 - val_accuracy: 0.8835 - val_loss: 0.3147
+Epoch 13/20
+844/844 - 2s - 3ms/step - accuracy: 0.9158 - loss: 0.2275 - val_accuracy: 0.8878 - val_loss: 0.3103
+Epoch 14/20
+844/844 - 2s - 3ms/step - accuracy: 0.9193 - loss: 0.2186 - val_accuracy: 0.8887 - val_loss: 0.3036
+Epoch 15/20
+844/844 - 2s - 3ms/step - accuracy: 0.9222 - loss: 0.2113 - val_accuracy: 0.8902 - val_loss: 0.3051
+Epoch 16/20
+844/844 - 2s - 3ms/step - accuracy: 0.9240 - loss: 0.2048 - val_accuracy: 0.8927 - val_loss: 0.2976
+Epoch 17/20
+844/844 - 2s - 3ms/step - accuracy: 0.9267 - loss: 0.1972 - val_accuracy: 0.8952 - val_loss: 0.2936
+Epoch 18/20
+844/844 - 2s - 3ms/step - accuracy: 0.9298 - loss: 0.1899 - val_accuracy: 0.8930 - val_loss: 0.2999
+Epoch 19/20
+844/844 - 2s - 3ms/step - accuracy: 0.9312 - loss: 0.1829 - val_accuracy: 0.8938 - val_loss: 0.3024
+Epoch 20/20
+844/844 - 2s - 3ms/step - accuracy: 0.9339 - loss: 0.1769 - val_accuracy: 0.8950 - val_loss: 0.3028
+Restoring model weights from the end of the best epoch: 17.
+E0000 00:00:1788295911.082726 1429340 node_def_util.cc:682] NodeDef mentions attribute use_unbounded_threadpool which is not in the op definition: Op<name=MapDataset; signature=input_dataset:variant, other_arguments: -> handle:variant; attr=f:func; attr=Targuments:list(type),min=0; attr=output_types:list(type),min=1; attr=output_shapes:list(shape),min=1; attr=use_inter_op_parallelism:bool,default=true; attr=preserve_cardinality:bool,default=false; attr=force_synchronous:bool,default=false; attr=metadata:string,default=""> This may be expected if your graph generating binary is newer  than this binary. Unknown attributes will be ignored. NodeDef: {{node ParallelMapDatasetV2/_15}}
+  figura -> results/curvas_exp1_lenet_clasica.png
+Exp 1: train_acc=0.9187  val_acc=0.8952  test_acc=0.8926  (20 épocas, 55.7s)
+
+======================================================================
+Exp 2 — LeNet-5 Optimizada  (106,154 parámetros entrenables)
+======================================================================
+Model: "LeNet5_optimizada"
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━┓
+┃ Layer (type)                    ┃ Output Shape           ┃       Param # ┃
+┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━┩
+│ conv1 (Conv2D)                  │ (None, 28, 28, 6)      │            60 │
+├─────────────────────────────────┼────────────────────────┼───────────────┤
+│ pool1 (MaxPooling2D)            │ (None, 14, 14, 6)      │             0 │
+├─────────────────────────────────┼────────────────────────┼───────────────┤
+│ conv2 (Conv2D)                  │ (None, 14, 14, 16)     │           880 │
+├─────────────────────────────────┼────────────────────────┼───────────────┤
+│ pool2 (MaxPooling2D)            │ (None, 7, 7, 16)       │             0 │
+├─────────────────────────────────┼────────────────────────┼───────────────┤
+│ flatten (Flatten)               │ (None, 784)            │             0 │
+├─────────────────────────────────┼────────────────────────┼───────────────┤
+│ fc1 (Dense)                     │ (None, 120)            │        94,200 │
+├─────────────────────────────────┼────────────────────────┼───────────────┤
+│ fc2 (Dense)                     │ (None, 84)             │        10,164 │
+├─────────────────────────────────┼────────────────────────┼───────────────┤
+│ output (Dense)                  │ (None, 10)             │           850 │
+└─────────────────────────────────┴────────────────────────┴───────────────┘
+ Total params: 106,154 (414.66 KB)
+ Trainable params: 106,154 (414.66 KB)
+ Non-trainable params: 0 (0.00 B)
+Epoch 1/20
+844/844 - 3s - 4ms/step - accuracy: 0.8136 - loss: 0.5166 - val_accuracy: 0.8583 - val_loss: 0.3799
+Epoch 2/20
+844/844 - 2s - 3ms/step - accuracy: 0.8793 - loss: 0.3362 - val_accuracy: 0.8767 - val_loss: 0.3261
+Epoch 3/20
+844/844 - 2s - 3ms/step - accuracy: 0.8951 - loss: 0.2901 - val_accuracy: 0.8852 - val_loss: 0.2965
+Epoch 4/20
+844/844 - 2s - 3ms/step - accuracy: 0.9041 - loss: 0.2620 - val_accuracy: 0.8910 - val_loss: 0.2853
+Epoch 5/20
+844/844 - 2s - 3ms/step - accuracy: 0.9114 - loss: 0.2412 - val_accuracy: 0.8955 - val_loss: 0.2775
+Epoch 6/20
+844/844 - 2s - 3ms/step - accuracy: 0.9170 - loss: 0.2241 - val_accuracy: 0.8970 - val_loss: 0.2722
+Epoch 7/20
+844/844 - 2s - 3ms/step - accuracy: 0.9218 - loss: 0.2099 - val_accuracy: 0.8977 - val_loss: 0.2660
+Epoch 8/20
+844/844 - 2s - 3ms/step - accuracy: 0.9271 - loss: 0.1957 - val_accuracy: 0.8962 - val_loss: 0.2743
+Epoch 9/20
+844/844 - 2s - 3ms/step - accuracy: 0.9322 - loss: 0.1820 - val_accuracy: 0.8935 - val_loss: 0.2801
+Epoch 10/20
+844/844 - 2s - 3ms/step - accuracy: 0.9371 - loss: 0.1693 - val_accuracy: 0.8977 - val_loss: 0.2791
+Epoch 11/20
+844/844 - 2s - 3ms/step - accuracy: 0.9429 - loss: 0.1568 - val_accuracy: 0.8943 - val_loss: 0.2944
+Epoch 12/20
+844/844 - 2s - 3ms/step - accuracy: 0.9470 - loss: 0.1457 - val_accuracy: 0.8942 - val_loss: 0.2996
+Epoch 12: early stopping
+Restoring model weights from the end of the best epoch: 7.
+E0000 00:00:1788295942.336619 1429340 node_def_util.cc:682] NodeDef mentions attribute use_unbounded_threadpool which is not in the op definition: Op<name=MapDataset; signature=input_dataset:variant, other_arguments: -> handle:variant; attr=f:func; attr=Targuments:list(type),min=0; attr=output_types:list(type),min=1; attr=output_shapes:list(shape),min=1; attr=use_inter_op_parallelism:bool,default=true; attr=preserve_cardinality:bool,default=false; attr=force_synchronous:bool,default=false; attr=metadata:string,default=""> This may be expected if your graph generating binary is newer  than this binary. Unknown attributes will be ignored. NodeDef: {{node ParallelMapDatasetV2/_15}}
+  figura -> results/curvas_exp2_lenet_optimizada.png
+Exp 2: train_acc=0.9234  val_acc=0.8977  test_acc=0.8943  (12 épocas, 30.1s)
+
+======================================================================
+Exp 3 — AlexNet Adaptada  (3,310,858 parámetros entrenables)
+======================================================================
+Model: "AlexNet_adaptada"
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━┓
+┃ Layer (type)                    ┃ Output Shape           ┃       Param # ┃
+┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━┩
+│ conv1 (Conv2D)                  │ (None, 28, 28, 32)     │           320 │
+├─────────────────────────────────┼────────────────────────┼───────────────┤
+│ pool1 (MaxPooling2D)            │ (None, 14, 14, 32)     │             0 │
+├─────────────────────────────────┼────────────────────────┼───────────────┤
+│ conv2 (Conv2D)                  │ (None, 14, 14, 64)     │        18,496 │
+├─────────────────────────────────┼────────────────────────┼───────────────┤
+│ pool2 (MaxPooling2D)            │ (None, 7, 7, 64)       │             0 │
+├─────────────────────────────────┼────────────────────────┼───────────────┤
+│ conv3 (Conv2D)                  │ (None, 7, 7, 128)      │        73,856 │
+├─────────────────────────────────┼────────────────────────┼───────────────┤
+│ conv4 (Conv2D)                  │ (None, 7, 7, 512)      │       590,336 │
+├─────────────────────────────────┼────────────────────────┼───────────────┤
+│ conv5 (Conv2D)                  │ (None, 7, 7, 256)      │     1,179,904 │
+├─────────────────────────────────┼────────────────────────┼───────────────┤
+│ pool3 (MaxPooling2D)            │ (None, 3, 3, 256)      │             0 │
+├─────────────────────────────────┼────────────────────────┼───────────────┤
+│ flatten (Flatten)               │ (None, 2304)           │             0 │
+├─────────────────────────────────┼────────────────────────┼───────────────┤
+│ fc6 (Dense)                     │ (None, 512)            │     1,180,160 │
+├─────────────────────────────────┼────────────────────────┼───────────────┤
+│ fc7 (Dense)                     │ (None, 512)            │       262,656 │
+├─────────────────────────────────┼────────────────────────┼───────────────┤
+│ output (Dense)                  │ (None, 10)             │         5,130 │
+└─────────────────────────────────┴────────────────────────┴───────────────┘
+ Total params: 3,310,858 (12.63 MB)
+ Trainable params: 3,310,858 (12.63 MB)
+ Non-trainable params: 0 (0.00 B)
+Epoch 1/20
+E0000 00:00:1788295949.507312 1429340 node_def_util.cc:682] NodeDef mentions attribute use_unbounded_threadpool which is not in the op definition: Op<name=MapDataset; signature=input_dataset:variant, other_arguments: -> handle:variant; attr=f:func; attr=Targuments:list(type),min=0; attr=output_types:list(type),min=1; attr=output_shapes:list(shape),min=1; attr=use_inter_op_parallelism:bool,default=true; attr=preserve_cardinality:bool,default=false; attr=force_synchronous:bool,default=false; attr=metadata:string,default=""> This may be expected if your graph generating binary is newer  than this binary. Unknown attributes will be ignored. NodeDef: {{node ParallelMapDatasetV2/_15}}
+844/844 - 6s - 8ms/step - accuracy: 0.8188 - loss: 0.4809 - val_accuracy: 0.8758 - val_loss: 0.3304
+Epoch 2/20
+844/844 - 5s - 6ms/step - accuracy: 0.8946 - loss: 0.2832 - val_accuracy: 0.8938 - val_loss: 0.2897
+Epoch 3/20
+844/844 - 5s - 6ms/step - accuracy: 0.9123 - loss: 0.2361 - val_accuracy: 0.8993 - val_loss: 0.2769
+Epoch 4/20
+844/844 - 5s - 6ms/step - accuracy: 0.9238 - loss: 0.2047 - val_accuracy: 0.9025 - val_loss: 0.2738
+Epoch 5/20
+844/844 - 5s - 6ms/step - accuracy: 0.9314 - loss: 0.1840 - val_accuracy: 0.9037 - val_loss: 0.2822
+Epoch 6/20
+844/844 - 5s - 6ms/step - accuracy: 0.9411 - loss: 0.1588 - val_accuracy: 0.9080 - val_loss: 0.3089
+Epoch 7/20
+844/844 - 5s - 6ms/step - accuracy: 0.9476 - loss: 0.1360 - val_accuracy: 0.9113 - val_loss: 0.3123
+Epoch 8/20
+844/844 - 5s - 6ms/step - accuracy: 0.9535 - loss: 0.1236 - val_accuracy: 0.9110 - val_loss: 0.3267
+Epoch 9/20
+844/844 - 5s - 6ms/step - accuracy: 0.9587 - loss: 0.1093 - val_accuracy: 0.9117 - val_loss: 0.3035
+Epoch 9: early stopping
+Restoring model weights from the end of the best epoch: 4.
+E0000 00:00:1788295989.541346 1429340 node_def_util.cc:682] NodeDef mentions attribute use_unbounded_threadpool which is not in the op definition: Op<name=MapDataset; signature=input_dataset:variant, other_arguments: -> handle:variant; attr=f:func; attr=Targuments:list(type),min=0; attr=output_types:list(type),min=1; attr=output_shapes:list(shape),min=1; attr=use_inter_op_parallelism:bool,default=true; attr=preserve_cardinality:bool,default=false; attr=force_synchronous:bool,default=false; attr=metadata:string,default=""> This may be expected if your graph generating binary is newer  than this binary. Unknown attributes will be ignored. NodeDef: {{node ParallelMapDatasetV2/_15}}
+  figura -> results/curvas_exp3_alexnet.png
+Exp 3: train_acc=0.9255  val_acc=0.9025  test_acc=0.9049  (9 épocas, 46.0s)
+
+======================================================================
+Exp 4 — AlexNet + DataAug  (3,310,858 parámetros entrenables)
+======================================================================
+Model: "AlexNet_dataaug"
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━┓
+┃ Layer (type)                    ┃ Output Shape           ┃       Param # ┃
+┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━┩
+│ data_augmentation (Sequential)  │ (None, 28, 28, 1)      │             0 │
+├─────────────────────────────────┼────────────────────────┼───────────────┤
+│ conv1 (Conv2D)                  │ (None, 28, 28, 32)     │           320 │
+├─────────────────────────────────┼────────────────────────┼───────────────┤
+│ pool1 (MaxPooling2D)            │ (None, 14, 14, 32)     │             0 │
+├─────────────────────────────────┼────────────────────────┼───────────────┤
+│ conv2 (Conv2D)                  │ (None, 14, 14, 64)     │        18,496 │
+├─────────────────────────────────┼────────────────────────┼───────────────┤
+│ pool2 (MaxPooling2D)            │ (None, 7, 7, 64)       │             0 │
+├─────────────────────────────────┼────────────────────────┼───────────────┤
+│ conv3 (Conv2D)                  │ (None, 7, 7, 128)      │        73,856 │
+├─────────────────────────────────┼────────────────────────┼───────────────┤
+│ conv4 (Conv2D)                  │ (None, 7, 7, 512)      │       590,336 │
+├─────────────────────────────────┼────────────────────────┼───────────────┤
+│ conv5 (Conv2D)                  │ (None, 7, 7, 256)      │     1,179,904 │
+├─────────────────────────────────┼────────────────────────┼───────────────┤
+│ pool3 (MaxPooling2D)            │ (None, 3, 3, 256)      │             0 │
+├─────────────────────────────────┼────────────────────────┼───────────────┤
+│ flatten (Flatten)               │ (None, 2304)           │             0 │
+├─────────────────────────────────┼────────────────────────┼───────────────┤
+│ fc6 (Dense)                     │ (None, 512)            │     1,180,160 │
+├─────────────────────────────────┼────────────────────────┼───────────────┤
+│ fc7 (Dense)                     │ (None, 512)            │       262,656 │
+├─────────────────────────────────┼────────────────────────┼───────────────┤
+│ output (Dense)                  │ (None, 10)             │         5,130 │
+└─────────────────────────────────┴────────────────────────┴───────────────┘
+ Total params: 3,310,858 (12.63 MB)
+ Trainable params: 3,310,858 (12.63 MB)
+ Non-trainable params: 0 (0.00 B)
+Epoch 1/20
+E0000 00:00:1788295998.101916 1429340 node_def_util.cc:682] NodeDef mentions attribute use_unbounded_threadpool which is not in the op definition: Op<name=MapDataset; signature=input_dataset:variant, other_arguments: -> handle:variant; attr=f:func; attr=Targuments:list(type),min=0; attr=output_types:list(type),min=1; attr=output_shapes:list(shape),min=1; attr=use_inter_op_parallelism:bool,default=true; attr=preserve_cardinality:bool,default=false; attr=force_synchronous:bool,default=false; attr=metadata:string,default=""> This may be expected if your graph generating binary is newer  than this binary. Unknown attributes will be ignored. NodeDef: {{node ParallelMapDatasetV2/_15}}
+844/844 - 7s - 8ms/step - accuracy: 0.7969 - loss: 0.5414 - val_accuracy: 0.8657 - val_loss: 0.3729
+Epoch 2/20
+844/844 - 5s - 6ms/step - accuracy: 0.8682 - loss: 0.3491 - val_accuracy: 0.8748 - val_loss: 0.3358
+Epoch 3/20
+844/844 - 5s - 6ms/step - accuracy: 0.8870 - loss: 0.3034 - val_accuracy: 0.8895 - val_loss: 0.2954
+Epoch 4/20
+844/844 - 5s - 6ms/step - accuracy: 0.8959 - loss: 0.2770 - val_accuracy: 0.8915 - val_loss: 0.2851
+Epoch 5/20
+844/844 - 5s - 6ms/step - accuracy: 0.9055 - loss: 0.2545 - val_accuracy: 0.8922 - val_loss: 0.2857
+Epoch 6/20
+844/844 - 5s - 6ms/step - accuracy: 0.9090 - loss: 0.2423 - val_accuracy: 0.8930 - val_loss: 0.2829
+Epoch 7/20
+844/844 - 5s - 6ms/step - accuracy: 0.9142 - loss: 0.2283 - val_accuracy: 0.9030 - val_loss: 0.2680
+Epoch 8/20
+844/844 - 5s - 6ms/step - accuracy: 0.9195 - loss: 0.2138 - val_accuracy: 0.9022 - val_loss: 0.2783
+Epoch 9/20
+844/844 - 5s - 6ms/step - accuracy: 0.9234 - loss: 0.2049 - val_accuracy: 0.9003 - val_loss: 0.2847
+Epoch 10/20
+844/844 - 5s - 6ms/step - accuracy: 0.9257 - loss: 0.1980 - val_accuracy: 0.9082 - val_loss: 0.2861
+Epoch 11/20
+844/844 - 5s - 6ms/step - accuracy: 0.9290 - loss: 0.1884 - val_accuracy: 0.9047 - val_loss: 0.2775
+Epoch 12/20
+844/844 - 5s - 6ms/step - accuracy: 0.9317 - loss: 0.1794 - val_accuracy: 0.9110 - val_loss: 0.2688
+Epoch 12: early stopping
+Restoring model weights from the end of the best epoch: 7.
+E0000 00:00:1788296057.480856 1429340 node_def_util.cc:682] NodeDef mentions attribute use_unbounded_threadpool which is not in the op definition: Op<name=MapDataset; signature=input_dataset:variant, other_arguments: -> handle:variant; attr=f:func; attr=Targuments:list(type),min=0; attr=output_types:list(type),min=1; attr=output_shapes:list(shape),min=1; attr=use_inter_op_parallelism:bool,default=true; attr=preserve_cardinality:bool,default=false; attr=force_synchronous:bool,default=false; attr=metadata:string,default=""> This may be expected if your graph generating binary is newer  than this binary. Unknown attributes will be ignored. NodeDef: {{node ParallelMapDatasetV2/_15}}
+  figura -> results/curvas_exp4_alexnet_dataaug.png
+Exp 4: train_acc=0.9221  val_acc=0.9030  test_acc=0.9021  (12 épocas, 65.7s)
+
+Mejor modelo global: Exp 3 — AlexNet Adaptada (test_acc=0.9049)
+Resultados -> /home/julian/Documentos/juli/facultad/s8/ia2/trabajosPracticos/tp4/results/experimentos.pkl
