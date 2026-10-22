@@ -1,0 +1,6 @@
+# Dataset (866 MB: no va al repositorio)
+archive/
+archive.zip
+
+# Salidas del entrenamiento (checkpoints y figuras se regeneran con el código)
+outputs/

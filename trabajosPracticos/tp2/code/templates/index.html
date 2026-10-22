@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TP2 — Predictor de cluster (candy-data)</title>
+<style>
+  :root { --accent: #2c7fb8; --noise: #b35900; }
+  * { box-sizing: border-box; }
+  body { font-family: system-ui, sans-serif; margin: 0; color: #222;
+         background: #f7f9fb; }
+  main { max-width: 1000px; margin: 0 auto; padding: 1.5rem 1rem 3rem; }
+  h1 { font-size: 1.5rem; margin-bottom: .2rem; }
+  h2 { font-size: 1.15rem; margin-top: 2rem; border-bottom: 2px solid var(--accent);
+       padding-bottom: .2rem; }
+  .sub { color: #555; margin-top: 0; }
+  form { background: #fff; border: 1px solid #ddd; border-radius: 10px;
+         padding: 1rem 1.2rem; }
+  fieldset { border: none; padding: .4rem 0; margin: 0; }
+  legend { font-weight: 600; padding: 0; }
+  .checks { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: .2rem 1rem; }
+  .checks label, .radio label { font-weight: 400; }
+  .num { display: flex; gap: 1rem; flex-wrap: wrap; }
+  .num label { display: flex; flex-direction: column; font-size: .9rem; gap: .15rem; }
+  .num input { width: 130px; padding: .3rem .4rem; border: 1px solid #bbb;
+               border-radius: 6px; }
+  .radio { display: flex; gap: 1.2rem; }
+  button { margin-top: .8rem; background: var(--accent); color: #fff; border: none;
+           padding: .55rem 1.4rem; font-size: 1rem; border-radius: 8px; cursor: pointer; }
+  button:hover { background: #1f6089; }
+  .error { background: #fdecea; border: 1px solid #f5c6c0; color: #8a1f11;
+           padding: .7rem 1rem; border-radius: 8px; margin-top: 1rem; }
+  .cards { display: flex; gap: 1rem; flex-wrap: wrap; }
+  .card { background: #fff; border: 1px solid #ddd; border-radius: 10px;
+          padding: .9rem 1.1rem; flex: 1; min-width: 240px; }
+  .card h3 { margin: 0 0 .4rem; font-size: 1rem; color: #555; }
+  .cluster { font-size: 1.6rem; font-weight: 700; margin: .1rem 0 .3rem;
+             color: var(--accent); }
+  .cluster.noise { color: var(--noise); }
+  .card p { margin: .15rem 0; font-size: .9rem; }
+  .muted { color: #666; }
+  img.plot { max-width: 100%; background: #fff; border: 1px solid #ddd;
+             border-radius: 10px; }
+  table { border-collapse: collapse; background: #fff; }
+  th, td { border: 1px solid #ddd; padding: .3rem .6rem; font-size: .88rem;
+           text-align: right; }
+  th { background: #eef4f9; }
+  td:first-child, th:first-child { text-align: left; }
+  tr.assigned td { background: #fff3bf; font-weight: 600; }
+  .tables { display: flex; gap: 2rem; flex-wrap: wrap; }
+  .members { background: #fff; border: 1px solid #ddd; border-radius: 10px;
+             padding: .7rem 1rem; margin-bottom: .8rem; font-size: .9rem; }
+  .members b { color: var(--accent); }
+</style>
+</head>
+<body>
+<main>
+  <h1>Predictor de cluster — candy-data (TP2)</h1>
+  <p class="sub">Cargá las características de una golosina y mirá a qué cluster
+     cae según los tres modelos entrenados: k-means, jerárquico y DBSCAN.</p>
+
+  <form method="post" action="/predict">
+    <fieldset class="radio">
+      <legend>Escenario de clustering</legend>
+      <label><input type="radio" name="scenario" value="comp"
+        {% if form.get('scenario', 'comp') == 'comp' %}checked{% endif %}>
+        Sin winpercent (11 features, K=3)</label>
+      <label><input type="radio" name="scenario" value="full"
+        {% if form.get('scenario') == 'full' %}checked{% endif %}>
+        Con winpercent (12 features, K=2)</label>
+    </fieldset>
+
+    <fieldset>
+      <legend>Características binarias</legend>
+      <div class="checks">
+        {% for c in binary %}
+        <label><input type="checkbox" name="{{ c }}"
+          {% if form.get(c) in (1, 1.0, 'on') %}checked{% endif %}>
+          {{ labels[c] }}</label>
+        {% endfor %}
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Características continuas</legend>
+      <div class="num">
+        {% for c in cont %}
+        <label>{{ labels[c] }}
+          <input type="number" name="{{ c }}" step="0.01" min="0" max="1"
+                 value="{{ form.get(c, '') }}" required>
+        </label>
+        {% endfor %}
+        <label>{{ labels[win] }}
+          <input type="number" name="{{ win }}" step="0.1" min="0" max="100"
+                 value="{{ form.get(win, '') }}">
+          <span class="muted">solo se usa en el escenario «con winpercent»</span>
+        </label>
+      </div>
+    </fieldset>
+
+    <button type="submit">Predecir cluster</button>
+  </form>
+
+  {% if error %}
+  <div class="error"><b>Error:</b> {{ error }}</div>
+  {% endif %}
+
+  {% if result %}
+  <h2>Predicción (escenario {{ result.scenario_tag }})</h2>
+  <div class="cards">
+    {% for m in result.cards %}
+    <div class="card">
+      <h3>{{ m.title }}</h3>
+      {% if m.noise %}
+        <p class="cluster noise">Ruido / outlier</p>
+      {% else %}
+        <p class="cluster">Cluster {{ m.cluster }}</p>
+        <p class="muted">{{ m.n_members }} golosinas en el cluster</p>
+      {% endif %}
+      <p>{{ m.detail }}</p>
+    </div>
+    {% endfor %}
+  </div>
+
+  <h2>Proyección PCA 2D</h2>
+  <img class="plot" src="data:image/png;base64,{{ result.plot }}"
+       alt="Scatter PCA con el vector nuevo destacado">
+
+  <h2>Distancias a los clusters</h2>
+  <div class="tables">
+    <div>
+      <p><b>K-means</b> — distancia euclídea a cada centroide (espacio escalado)</p>
+      <table>
+        <tr><th>Cluster</th><th>Distancia</th></tr>
+        {% for d in result.km_distances %}
+        <tr class="{{ 'assigned' if d.assigned else '' }}">
+          <td>cluster {{ d.cluster }}</td><td>{{ '%.3f'|format(d.dist) }}</td>
+        </tr>
+        {% endfor %}
+      </table>
+    </div>
+    <div>
+      <p><b>Jerárquico (average)</b> — distancia promedio a los miembros</p>
+      <table>
+        <tr><th>Cluster</th><th>Distancia prom.</th></tr>
+        {% for d in result.hier_distances %}
+        <tr class="{{ 'assigned' if d.assigned else '' }}">
+          <td>cluster {{ d.cluster }}</td><td>{{ '%.3f'|format(d.dist) }}</td>
+        </tr>
+        {% endfor %}
+      </table>
+    </div>
+    <div>
+      <p><b>DBSCAN</b> — regla de alcanzabilidad</p>
+      <table>
+        <tr><th>Parámetro</th><th>Valor</th></tr>
+        <tr><td>eps</td><td>{{ result.dbscan_info.eps }}</td></tr>
+        <tr><td>min_samples</td><td>{{ result.dbscan_info.min_samples }}</td></tr>
+        <tr class="{{ '' if result.dbscan_info.noise else 'assigned' }}">
+          <td>dist. al core point más cercano</td>
+          <td>{{ '%.3f'|format(result.dbscan_info.min_core_dist) }}</td>
+        </tr>
+      </table>
+      {% if result.dbscan_info.noise %}
+      <p class="muted">La distancia supera eps → el punto queda como <b>ruido</b>.</p>
+      {% endif %}
+    </div>
+  </div>
+
+  <h2>Perfil de los clusters k-means (medias en escala original)</h2>
+  <table>
+    <tr>
+      <th>Cluster</th><th>n</th>
+      {% for c in result.cols %}<th>{{ c }}</th>{% endfor %}
+      <th>winpercent medio</th>
+    </tr>
+    {% for r in result.profile_kmeans %}
+    <tr class="{{ 'assigned' if r.assigned else '' }}">
+      <td>cluster {{ r.cluster }}</td><td>{{ r.n }}</td>
+      {% for v in r.vals %}<td>{{ '%.2f'|format(v) }}</td>{% endfor %}
+      <td>{{ r.win_mean }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+
+  <h2>Miembros del cluster asignado</h2>
+  {% for m in result.cards %}
+  <div class="members">
+    <b>{{ m.title }}:</b>
+    {% if m.noise %}
+      el punto es ruido; no pertenece a ningún cluster.
+    {% else %}
+      {{ result.members[m.key]|join(', ') }}.
+    {% endif %}
+  </div>
+  {% endfor %}
+  {% endif %}
+</main>
+</body>
+</html>
