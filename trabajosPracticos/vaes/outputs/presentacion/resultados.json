@@ -1,0 +1,67 @@
+{
+  "vae": {
+    "parametros": 2958659,
+    "epocas": 200,
+    "minutos_entrenamiento": 12.6,
+    "minutos_solo_epocas": 10.6,
+    "uso_del_latente": {
+      "sigma_medio": 0.3776,
+      "dims_activas": 101,
+      "dims_colapsadas": 3,
+      "dims_totales": 128
+    },
+    "epoca_30": {
+      "train_total": 6675.12,
+      "train_recon": 6537.31,
+      "train_kl": 137.81,
+      "val_total": 6681.14,
+      "val_recon": 6544.42,
+      "val_kl": 136.72,
+      "seconds": 3.2
+    },
+    "epoca_200": {
+      "train_total": 6576.28,
+      "train_recon": 6431.79,
+      "train_kl": 144.49,
+      "val_total": 6682.84,
+      "val_recon": 6539.77,
+      "val_kl": 143.07,
+      "seconds": 3.2
+    },
+    "mejor_validacion": {
+      "epoca": 62,
+      "val_total": 6668.29,
+      "val_recon": 6528.53,
+      "val_kl": 139.75
+    }
+  },
+  "ae": {
+    "parametros": 2434243,
+    "epocas": 200,
+    "minutos_entrenamiento": 11.4,
+    "minutos_solo_epocas": 10.7,
+    "final": {
+      "train_recon": 6327.85,
+      "val_recon": 6504.56,
+      "seconds": 3.23
+    },
+    "mejor_validacion": {
+      "epoca": 33,
+      "val_recon": 6453.15
+    }
+  },
+  "comparacion_recon_final": {
+    "vae_train_recon": 6431.79,
+    "ae_train_recon": 6327.85,
+    "diferencia": 103.94
+  },
+  "entrenamiento": {
+    "optimizador": "Adam",
+    "lr": 0.001,
+    "batch_size": 128,
+    "latent_dim": 128,
+    "img_size": 64,
+    "gpu": "NVIDIA GeForce RTX 5060 Ti",
+    "torch": "2.11.0+cu128"
+  }
+}

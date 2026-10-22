@@ -1,0 +1,24 @@
+{
+  "directorio": "/home/julian/Documentos/juli/facultad/s8/ia2/trabajosPracticos/vaes/archive/cropped",
+  "n_imagenes": 9877,
+  "tamano_mb": 400.0,
+  "tamano_mib": 381.4,
+  "tamano_bytes": 399963726,
+  "dimensiones": {
+    "200x200": 9877
+  },
+  "modos_color": {
+    "RGB": 9877
+  },
+  "extensiones": {
+    ".png": 9877
+  },
+  "img_size_entrenamiento": 64,
+  "valores_por_imagen_original": 120000,
+  "valores_por_imagen_64": 12288,
+  "latent_dim": 128,
+  "factor_compresion": 96.0,
+  "val_split": 0.05,
+  "n_train": 9383,
+  "n_val": 494
+}

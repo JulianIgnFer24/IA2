@@ -3,4 +3,5 @@ archive/
 archive.zip
 
 # Salidas del entrenamiento (checkpoints y figuras se regeneran con el código)
-outputs/
+outputs/*
+!outputs/presentacion/

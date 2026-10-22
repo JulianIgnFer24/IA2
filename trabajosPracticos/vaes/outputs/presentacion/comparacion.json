@@ -1,0 +1,69 @@
+{
+  "cropped": {
+    "etiqueta": "cropped (fotogramas reales)",
+    "vae": {
+      "train_total": 6576.28,
+      "val_total": 6682.84,
+      "train_recon": 6431.79,
+      "train_kl": 144.49,
+      "mejor_val_epoca": 62,
+      "mejor_val_total": 6668.29,
+      "brecha_final": 106.56,
+      "minutos": 10.6
+    },
+    "ae": {
+      "train_recon": 6327.85,
+      "val_recon": 6504.56
+    },
+    "ventaja_ae_recon": 103.94,
+    "uso_latente": {
+      "sigma_medio": 0.3776,
+      "dims_activas": 101,
+      "dims_colapsadas": 3
+    },
+    "nitidez": {
+      "nitidez_original": 0.0557,
+      "nitidez_reconstruccion": 0.00345,
+      "conservada_pct": 6.2
+    },
+    "realismo": {
+      "dist_generada": 23.632,
+      "dist_entre_reales": 26.376,
+      "cociente": 0.9
+    }
+  },
+  "simplified": {
+    "etiqueta": "simplified (colores planos)",
+    "vae": {
+      "train_total": 5559.3,
+      "val_total": 5577.36,
+      "train_recon": 5452.4,
+      "train_kl": 106.9,
+      "mejor_val_epoca": 49,
+      "mejor_val_total": 5554.9,
+      "brecha_final": 18.06,
+      "minutos": 7.7
+    },
+    "ae": {
+      "train_recon": 5376.9,
+      "val_recon": 5389.03
+    },
+    "ventaja_ae_recon": 75.49,
+    "uso_latente": {
+      "sigma_medio": 0.5856,
+      "dims_activas": 60,
+      "dims_colapsadas": 48
+    },
+    "nitidez": {
+      "nitidez_original": 0.00432,
+      "nitidez_reconstruccion": 0.00172,
+      "conservada_pct": 39.8
+    },
+    "realismo": {
+      "dist_generada": 23.501,
+      "dist_entre_reales": 20.624,
+      "cociente": 1.14
+    }
+  },
+  "_nota": "Las pérdidas de cropped y simplified no son comparables en valor absoluto: simplified tiene colores planos, así que su BCE mínima alcanzable es mucho menor. Lo comparable es el comportamiento (uso del latente, brecha train/val, nitidez conservada) y la calidad visual."
+}
